@@ -4,5 +4,7 @@ the brute force method. Main goal of the project was to produce animations and t
 the speedup offered by the BH method over the brute force method. See the ppt presentation
 in root for more details. 
 
+<img src="https://raw.github.com/akoreman/Planetary-Dynamics-Barnes-Hut/main/images/Collision.PNG" width="400"> 
+
 **Time complexity scaling**
 <img src="https://raw.github.com/akoreman/Planetary-Dynamics-Barnes-Hut/main/images/TimeComplexity.PNG" width="400">  
