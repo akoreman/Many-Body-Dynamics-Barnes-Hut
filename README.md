@@ -6,5 +6,5 @@ in root for more details.
 
 <img src="https://raw.github.com/akoreman/Planetary-Dynamics-Barnes-Hut/main/images/Collision.PNG" width="400"> 
 
-**Time complexity scaling**
+**Time complexity scaling**  
 <img src="https://raw.github.com/akoreman/Planetary-Dynamics-Barnes-Hut/main/images/TimeComplexity.PNG" width="400">  
