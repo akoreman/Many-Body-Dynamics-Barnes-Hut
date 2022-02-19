@@ -10,5 +10,7 @@ See the ppt presentation in root for more details. Barnes-Hut algorithm implemen
 
 <img src="https://raw.github.com/akoreman/Planetary-Dynamics-Barnes-Hut/main/images/Collision.PNG" width="400"> 
 
+<img src="https://raw.github.com/akoreman/Planetary-Dynamics-Barnes-Hut/main/images/CollisionAnim.gif" width="400"> 
+
 **Time complexity scaling**  
 <img src="https://raw.github.com/akoreman/Planetary-Dynamics-Barnes-Hut/main/images/TimeComplexity.PNG" width="400">  
