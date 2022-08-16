@@ -8,6 +8,12 @@ the center-of-mass of a node of the tree is used to approximate the gravitationa
 
 See the ppt presentation in root for more details. Barnes-Hut algorithm implemented in C#, animations made using MatPlotLib in Python.
 
+### Curently Implemented:
+
+### To do:
+
+### Images:
+
 <img src="https://raw.github.com/akoreman/Planetary-Dynamics-Barnes-Hut/main/images/Collision.PNG" width="400"> 
 
 <img src="https://raw.github.com/akoreman/Planetary-Dynamics-Barnes-Hut/main/images/CollisionAnim.gif" width="400"> 
