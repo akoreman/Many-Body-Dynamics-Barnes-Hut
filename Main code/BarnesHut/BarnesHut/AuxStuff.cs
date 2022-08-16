@@ -43,8 +43,8 @@ namespace BarnesHut
         {
             if (xCoord == 0 & xCoord == 0)
                 return 0;
-            else
-                return (float)Math.Sqrt(xCoord * xCoord + yCoord * yCoord);
+            
+            return (float)Math.Sqrt(xCoord * xCoord + yCoord * yCoord);
         }
     }
 

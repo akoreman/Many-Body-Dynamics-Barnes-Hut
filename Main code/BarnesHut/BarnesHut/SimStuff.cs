@@ -301,48 +301,47 @@ namespace BarnesHut
 
             public void AddParticle(Particle part, TreeNode node)
             {
-                if (node.q.contains(part))
-                {
-                    //Console.WriteLine(part.mass);
+                if (!node.q.contains(part))
+                    return;
 
-                    if (node.children.Count > 0)
+                if (node.children.Count > 0)
+                {
+                    for (int i = 0; i < 8; i++)
                     {
+                        //if (node.children[i].q.contains(part))
+                        AddParticle(part, node.children[i]);
+                    }
+                }
+                else
+                {
+                    if (node.body.mass > 0)
+                    {
+                        node.children.Add(new TreeNode(node.q.NWH(), node));
+                        node.children.Add(new TreeNode(node.q.NEH(), node));
+                        node.children.Add(new TreeNode(node.q.SWH(), node));
+                        node.children.Add(new TreeNode(node.q.SEH(), node));
+                        node.children.Add(new TreeNode(node.q.NWL(), node));
+                        node.children.Add(new TreeNode(node.q.NEL(), node));
+                        node.children.Add(new TreeNode(node.q.SWL(), node));
+                        node.children.Add(new TreeNode(node.q.SEL(), node));
+
                         for (int i = 0; i < 8; i++)
                         {
                             //if (node.children[i].q.contains(part))
                             AddParticle(part, node.children[i]);
+
+                            //if (node.children[i].q.contains(node.body))
+                            AddParticle(node.body, node.children[i]);
                         }
                     }
-                    else
-                    {
-                        if (node.body.mass > 0)
-                        {
-                            node.children.Add(new TreeNode(node.q.NWH(), node));
-                            node.children.Add(new TreeNode(node.q.NEH(), node));
-                            node.children.Add(new TreeNode(node.q.SWH(), node));
-                            node.children.Add(new TreeNode(node.q.SEH(), node));
-                            node.children.Add(new TreeNode(node.q.NWL(), node));
-                            node.children.Add(new TreeNode(node.q.NEL(), node));
-                            node.children.Add(new TreeNode(node.q.SWL(), node));
-                            node.children.Add(new TreeNode(node.q.SEL(), node));
-
-                            for (int i = 0; i < 8; i++)
-                            {
-                                //if (node.children[i].q.contains(part))
-                                AddParticle(part, node.children[i]);
-
-                                //if (node.children[i].q.contains(node.body))
-                                AddParticle(node.body, node.children[i]);
-                            }
-                        }
-                    }
-
-                    node.body.pos *= node.body.mass;
-                    node.body.pos += part.pos *  part.mass;
-
-                    node.body.mass += part.mass;
-                    node.body.pos *= (1f / node.body.mass);
                 }
+
+                node.body.pos *= node.body.mass;
+                node.body.pos += part.pos *  part.mass;
+
+                node.body.mass += part.mass;
+                node.body.pos *= (1f / node.body.mass);
+                
             }
 
             public vec3D[] ForcesBrute()
@@ -355,13 +354,11 @@ namespace BarnesHut
                 for (int i = 0; i < bodyList.Count(); i++)
                     for (int j = 0; j < bodyList.Count(); j++)
                     {
-                        if (i != j)
-                        {
-                            vec3D temp = forcePair(bodyList[i], bodyList[j]);
+                        if (i == j) { continue; } 
+                        
+                        vec3D force = forcePair(bodyList[i], bodyList[j]);
 
-                            forces[i] += temp;
-                            //forces[j] -= temp;
-                        }
+                        forces[i] += force;
                     }
 
                 return forces;
@@ -373,9 +370,7 @@ namespace BarnesHut
 
                 for (int i = 0; i < bodyList.Count(); i++)
                 {
-                    //Console.WriteLine("body nr: " + i);
                     forces[i] = forceTreeNode(rootNode, bodyList[i]);
-                    //Console.WriteLine("force: " + forces[i].xCoord + " " + forces[i].yCoord);
                 }
 
                 return forces;
@@ -385,74 +380,42 @@ namespace BarnesHut
             {
                 float theta = node.q.edgeLength / (float)Math.Sqrt((node.body.pos - part.pos).squared());
 
-                //Console.WriteLine("theta: " + theta);
-
-                if (!((node.body.pos - part.pos).squared() == 0))
-                {
-                    if (theta < 1f)
-                    {
-                        return forcePair(part, node.body);
-                    }
-                    else
-                    {
-                        if (node.children.Count() > 0)
-                        {
-                            //Console.WriteLine("int node");
-                            vec3D force = new vec3D(0, 0, 0);
-
-                            for (int i = 0; i < 8; i++)
-                            {
-                                force += forceTreeNode(node.children[i], part);
-                            }
-
-                            return force;
-                        }
-                        else
-                        {
-                            //Console.WriteLine("ext node");
-                            return forcePair(part, node.body);
-                        }
-                    }
-
-                }
-                else
-                {
-                    //Console.WriteLine("zero vec");
+                if ((node.body.pos - part.pos).squared() == 0)
                     return new vec3D(0, 0, 0);
+
+                if (theta < 1f) { return forcePair(part, node.body); }
+
+                if (node.children.Count() == 0)
+                    return forcePair(part, node.body);
+
+                vec3D force = new vec3D(0, 0, 0);
+
+                for (int i = 0; i < 8; i++)
+                {
+                    force += forceTreeNode(node.children[i], part);
                 }
+
+                return force;
             }
 
-        /*
+
+        /// <summary>
+        /// Function to calculate the force between 2 particles.
+        /// </summary>
+        /// <param name="a">First Particle to calculate the force for.</param>
+        /// <param name="b">Second Particle to calculate the force for.</param>
+        /// <returns></returns>
         public vec3D forcePair(Particle a, Particle b)
         {
-            vec3D temp = new vec3D(0, 0, 0);
-            vec3D r = a.pos - b.pos;
-            float off = 0.01f;
-
-            if (r.squared() > 0)
-                temp = -1.0f * ((a.mass * b.mass) / (float)Math.Pow(r.squared() + off * off, 3 / 2)) * (r * (float)(1.0f / Math.Pow(r.squared(), 1.0f / 2.0f)) );
-
-            //temp = -1 * (((a.mass * b.mass) / (Math.Pow((r.magnitude() + 1, 2)) * (a.pos - b.pos).magnitude()) * r);
-            //Console.WriteLine("temp: " + temp.xCoord + " " + temp.yCoord + " " + temp.zCoord);
-
-            return temp;
-        }
-        */
-
-        public vec3D forcePair(Particle a, Particle b)
-        {
-            vec3D temp = new vec3D(0, 0, 0);
+            vec3D force = new vec3D(0, 0, 0);
             vec3D r = a.pos - b.pos;
 
             float eps = 1f;
 
             if (Math.Sqrt(r.squared()) > 1f)
-                temp = -1.0f * ((a.mass * b.mass) / (float)Math.Pow(r.squared() + eps*eps, 2 / 2)) * (r * (float)(1.0f / Math.Pow(r.squared(), 1.0 / 2.0)));
+                force = -1.0f * ((a.mass * b.mass) / (float)Math.Pow(r.squared() + eps*eps, 2 / 2)) * (r * (float)(1.0f / Math.Pow(r.squared(), 1.0 / 2.0)));
 
-            //temp = -1 * (((a.mass * b.mass) / (Math.Pow((r.magnitude() + 1, 2)) * (a.pos - b.pos).magnitude()) * r);
-            //Console.WriteLine("temp: " + temp.xCoord + " " + temp.yCoord + " " + temp.zCoord);
-
-            return temp;
+            return force;
         }
 
         public void WriteToFile(StreamWriter writer)
