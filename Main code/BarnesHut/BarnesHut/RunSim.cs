@@ -14,7 +14,6 @@ namespace BarnesHut
         static void Main()
         {
             RunSim(1000, "Plummer", "BarnesHut", "Beeman", 0.00005f, 500);
-        
         }
 
         static void RunSim(int numBodies, string initMethod, string forceMethod, string intMethod, float deltaT, int numFrames)

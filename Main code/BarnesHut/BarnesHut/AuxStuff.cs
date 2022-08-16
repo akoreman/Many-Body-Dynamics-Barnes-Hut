@@ -98,12 +98,12 @@ namespace BarnesHut
             this.edgeLength = edgeLength;
         }
 
-        public Boolean contains(Particle part)
+        public bool contains(Particle part)
         {
             if (part.pos.xCoord > LowLeftCorner.xCoord & part.pos.xCoord < LowLeftCorner.xCoord + edgeLength & part.pos.yCoord > LowLeftCorner.yCoord & part.pos.yCoord < LowLeftCorner.yCoord + edgeLength)
                 return true;
-            else
-                return false;
+            
+            return false;
         }
 
         public quad NW()
@@ -142,8 +142,8 @@ namespace BarnesHut
         {
             if (part.pos.xCoord >= LowLeftCorner.xCoord & part.pos.xCoord < LowLeftCorner.xCoord + edgeLength & part.pos.yCoord >= LowLeftCorner.yCoord & part.pos.yCoord < LowLeftCorner.yCoord + edgeLength & part.pos.zCoord >= LowLeftCorner.zCoord & part.pos.zCoord < LowLeftCorner.zCoord + edgeLength)
                 return true;
-            else
-                return false;
+            
+            return false;
         }
 
         public oct NWH()
