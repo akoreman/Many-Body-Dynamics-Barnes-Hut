@@ -44,10 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuxStuff.cs" />
-    <Compile Include="SimStuff.cs" />
+    <Compile Include="sim.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RunSim.cs" />
-    <Compile Include="TreeStuff.cs" />
+    <Compile Include="run-sim.cs" />
+    <Compile Include="tree.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
