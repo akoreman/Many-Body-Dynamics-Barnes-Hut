@@ -13,8 +13,8 @@ def f(x, a, b):
 def g(x, a, b):
     return (a + x)^2 + b
 
-brute = IO.ReadCSV("brute.csv")
-barnes = IO.ReadCSV("barnes.csv")
+brute = IO.ReadCSV("data/brute.csv")
+barnes = IO.ReadCSV("data/barnes.csv")
 
 nlist = [x[0] for x in barnes[0::2]]
 barnes = [x[0] for x in barnes[1::2]]
