@@ -9,8 +9,11 @@ the center-of-mass of a node of the tree is used to approximate the attraction o
 See the ppt presentation in root for more details. Barnes-Hut algorithm implemented in C#, animations made using MatPlotLib in Python.
 
 ### Curently Implemented:
-
-### To do:
+- Initialize an initial collection of bodies by adding groups of bodies according to a number of distributions.
+- Calculate forces between those bodies using either brute-force or the BH tree.
+- Use a number of integration techniques to cacluate new velocites and positions of the bodies.
+- Write these positions frame-by-frame to file.
+- Animate those files in animations as can be seen below.
 
 ### Images:
 
