@@ -1,4 +1,4 @@
-# Planetary Dynamics using Barnes-Hut tree algrotihm
+# Many-Body Dynamics using Barnes-Hut tree algrotihm
 Program to simulate many-body dynamics using the Barnes-Hut tree algorithm and
 the brute force method. Main goal of the project was to produce animations and to show
 the speedup offered by the BH method over the brute force method from N^2 to N log N. 
