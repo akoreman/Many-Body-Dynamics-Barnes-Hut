@@ -5,11 +5,14 @@ namespace BarnesHut
 {
     public class Program
     {
+        // Entry point from where the simulation starts and where parameters can be set.
         static void Main()
         {
-            List<BodyGroupProps3D> bodyPropList = new List<BodyGroupProps3D>();
-
-            bodyPropList.Add(new BodyGroupProps3D() { numBodies = 1000, initialisationMethod = "Plummer", centerOfMass = new Vec3D(0f, 0f, 0f), centerVelocity = new Vec3D(0f, 0f, 0f) });
+            // Add groups of particles to initialise here.
+            List<BodyGroupProps3D> bodyPropList = new List<BodyGroupProps3D>
+            {
+                new BodyGroupProps3D() { numBodies = 1000, initialisationMethod = "Plummer", centerOfMass = new Vec3D(0f, 0f, 0f), centerVelocity = new Vec3D(0f, 0f, 0f) }
+            };
 
             RunSim(bodyPropList, "BarnesHut", "Beeman", 0.00005f, 500);
         }
@@ -17,9 +20,6 @@ namespace BarnesHut
         static void RunSim(List<BodyGroupProps3D> bodyProps, string forceMethod, string integrationMethod, float deltaT, int numFrames)
         {
             Frame firstFrame = new Frame(100);
-
-            //float velocity = (float)Math.Sqrt((Math.Pow(10, 10) * 2 + 0) / (2f * 50));
-            //Vec3D velvec = new Vec3D(0f, (float)(velocity), 0f);
 
             foreach (BodyGroupProps3D props in bodyProps)
             {

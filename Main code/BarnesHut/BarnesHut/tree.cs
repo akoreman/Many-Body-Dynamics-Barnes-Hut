@@ -31,6 +31,18 @@ namespace BarnesHut
 
             children = new List<TreeNode>();
         }
+
+        public void InitializeChildren()
+        {
+            this.children.Add(new TreeNode(this.oct.GetHighNW(), this));
+            this.children.Add(new TreeNode(this.oct.GetHighNE(), this));
+            this.children.Add(new TreeNode(this.oct.GetHighSW(), this));
+            this.children.Add(new TreeNode(this.oct.GetHighSE(), this));
+            this.children.Add(new TreeNode(this.oct.GetLowNW(), this));
+            this.children.Add(new TreeNode(this.oct.GetLowNE(), this));
+            this.children.Add(new TreeNode(this.oct.GetLowSW(), this));
+            this.children.Add(new TreeNode(this.oct.GetLowSE(), this));
+        }
     }
 
 }

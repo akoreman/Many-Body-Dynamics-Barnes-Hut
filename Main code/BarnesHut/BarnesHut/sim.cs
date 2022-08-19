@@ -7,38 +7,33 @@ using System.Threading;
 
 namespace BarnesHut
 {
+    // Class to contain a single simulation.
     public class Simulation
     {
-        //public List<Frame> frameList;
         public StreamWriter writer = new StreamWriter("animation.csv");
 
         public Frame lastFrame;
-        Vec3D[] lastForces;
+        readonly Vec3D[] lastForces;
 
         public Frame prevLastFrame;
-        Vec3D[] prevLastForces;
+        readonly Vec3D[] prevLastForces;
 
+        // Constructor.
         public Simulation(Frame firstFrame)
         {
-            //frameList = new List<Frame>();
             this.lastFrame = new Frame(firstFrame);
             lastForces = new Vec3D[firstFrame.bodyList.Count];
             prevLastForces = new Vec3D[firstFrame.bodyList.Count];
         }
 
-        /*
-        public void AddFrame(Frame frame)
-        {
-            //frameList.Add(frame);
-        }
-        */
-
+        // Write the last frame to file.
         public void WriteToFile()
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-GB");
             lastFrame.WriteToFile(writer);
         }
 
+        // Calulate the positions and velocities for all the particles given the current frame following a set integration method.
         public void NextStep(float deltaT, string forceMethod, string integrationMethod)
         {
             Vec3D[] newForces = new Vec3D[lastFrame.bodyList.Count()];
@@ -67,7 +62,7 @@ namespace BarnesHut
                 case ("BarnesHut"):
                     {
                         lastFrame.BuildTree();
-                        newForces = lastFrame.forcesBHTree();
+                        newForces = lastFrame.ForcesBHTree();
 
 
                         for (int i = 0; i < oldFrame.bodyList.Count; i++)
@@ -90,7 +85,6 @@ namespace BarnesHut
                             newFrame.bodyList[i].velocity += (deltaT / oldFrame.bodyList[i].mass) * newForces[i];
                         }
 
-                        //frameList.Add(newFrame);
                         lastFrame = new Frame(newFrame);
                         prevLastFrame = new Frame(oldFrame);
 
@@ -99,16 +93,13 @@ namespace BarnesHut
 
                 case ("Beeman"):
                     {
-                        //vec3D[] newForces = new vec3D[lastFrame.bodyList.Count()];
-
                         for (int i = 0; i < oldFrame.bodyList.Count; i++)
                         {
                             newFrame.bodyList[i].position += deltaT * oldFrame.bodyList[i].velocity + (deltaT * deltaT / oldFrame.bodyList[i].mass) * ((2f / 3f) * lastForces[i] - (1f / 6f) * prevLastForces[i]);
                         }
 
                         newFrame.BuildTree();
-                        newForces = newFrame.forcesBHTree();
-                        //newForces = newFrame.ForcesBrute();
+                        newForces = newFrame.ForcesBHTree();
 
                         for (int i = 0; i < oldFrame.bodyList.Count; i++)
                         {
@@ -116,14 +107,8 @@ namespace BarnesHut
                             lastForces[i] = newForces[i];
                         }
 
-
-
                         for (int i = 0; i < oldFrame.bodyList.Count; i++)
-                        {
-                            //vec3D diff = (5f / 12f) * newForces[i] + (2f / 3f) * lastForces[i] - (1 / 12) * prevLastForces[i];
-                            //Console.WriteLine("diff: " + diff.xCoord + " " + diff.yCoord + " " + diff.zCoord);
                             newFrame.bodyList[i].velocity += (deltaT / oldFrame.bodyList[i].mass) * ((5f / 12f) * newForces[i] + (2f / 3f) * lastForces[i] - (1f / 12f) * prevLastForces[i]);
-                        }
 
                         lastFrame = new Frame(newFrame);
                         prevLastFrame = new Frame(oldFrame);
@@ -134,6 +119,7 @@ namespace BarnesHut
         }
     }
 
+    // Class to contain a frame of the simulation.
     public class Frame
     {
         public List<Particle> bodyList;
@@ -142,6 +128,7 @@ namespace BarnesHut
 
         readonly float boundingBoxWidth;
 
+        // Constructor.
         public Frame(float boundingboxwidth)
         {
             bodyList = new List<Particle>();
@@ -149,6 +136,7 @@ namespace BarnesHut
             this.boundingBoxWidth = boundingboxwidth;
         }
 
+        // Constructor.
         public Frame(Frame frame)
         {
             randomGenerator = new Random();
@@ -162,6 +150,7 @@ namespace BarnesHut
             }
         }
 
+        // Add a group of bodies to the current head frame according to some initialisation parameters.
         public void AddBodies(int nBodies, string method, Vec3D CenterOfMass = null, Vec3D CenterVelocity = null)
         {
             switch (method)
@@ -209,7 +198,7 @@ namespace BarnesHut
                             }
 
                             double velocity = x * Math.Sqrt(2) * Math.Pow((1 + radius * radius), -0.25);
-                            //Console.WriteLine(velocity);
+
                             theta = (float)(Math.Acos(randomGenerator.NextDouble() * 2 - 1));
                             phi = (float)(randomGenerator.NextDouble() * 2 * Math.PI);
 
@@ -237,17 +226,11 @@ namespace BarnesHut
 
                             Vec3D posvec = new Vec3D((float)(radius * Math.Cos(phi)), (float)(radius * Math.Sin(phi)), (float)randomGenerator.NextDouble());
 
-                            //float velocity = (float)Math.Sqrt((1 - (a) / (Math.Sqrt(a * a + radius * radius))) / (radius * radius));
-                            //float velocity = radius * (float)Math.Pow(radius * radius + a * a, 3/4);
                             float velocity = (float)Math.Sqrt(10 / radius);
-                            //Console.WriteLine(velocity);
+
                             Vec3D velvec = new Vec3D((float)(velocity * Math.Sin(phi)), (float)(-1 * velocity * Math.Cos(phi)), 0);
 
-
-                            //bodyList.Add(new Particle(posvec, velvec, 1 / (float)nBodies));
-                            //bodyList.Add(new Particle(posvec, new vec3D(0,0,0), 1 / (float)nBodies));
                             bodyList.Add(new Particle(posvec, velvec, 1f));
-                            //bodyList.Add(new Particle(posvec, 0.5f * velvec , 0.00025f));
                         }
 
                         break;
@@ -278,83 +261,68 @@ namespace BarnesHut
                         break;
                     }
             }
-
         }
 
+        // Build the BH tree recursively.
         public void BuildTree()
         {
             rootNode = new TreeNode(new Oct(new Vec3D(-boundingBoxWidth, -boundingBoxWidth, -boundingBoxWidth), 2f * boundingBoxWidth), null);
-
-            rootNode.children.Add(new TreeNode(rootNode.oct.GetHighNW(), rootNode));
-            rootNode.children.Add(new TreeNode(rootNode.oct.GetHighNE(), rootNode));
-            rootNode.children.Add(new TreeNode(rootNode.oct.GetHighSW(), rootNode));
-            rootNode.children.Add(new TreeNode(rootNode.oct.GetHighSE(), rootNode));
-            rootNode.children.Add(new TreeNode(rootNode.oct.GetLowNW(), rootNode));
-            rootNode.children.Add(new TreeNode(rootNode.oct.GetLowNE(), rootNode));
-            rootNode.children.Add(new TreeNode(rootNode.oct.GetLowSW(), rootNode));
-            rootNode.children.Add(new TreeNode(rootNode.oct.GetLowSE(), rootNode));
+            rootNode.InitializeChildren();
 
             for (int i = 0; i < bodyList.Count(); i++)
                 AddParticle(bodyList[i], rootNode);
         }
 
-        public void AddParticle(Particle part, TreeNode node)
+        // Add a particle to a TreeNode.
+        public static void AddParticle(Particle particle, TreeNode node)
         {
-            if (!node.oct.Contains(part))
+            if (!node.oct.Contains(particle))
                 return;
 
             if (node.children.Count > 0)
             {
                 for (int i = 0; i < 8; i++)
-                {
-                    //if (node.children[i].q.contains(part))
-                    AddParticle(part, node.children[i]);
-                }
+                    if (node.children[i].oct.Contains(particle))
+                        AddParticle(particle, node.children[i]);
             }
             else
             {
                 if (node.body.mass > 0)
                 {
-                    node.children.Add(new TreeNode(node.oct.GetHighNW(), node));
-                    node.children.Add(new TreeNode(node.oct.GetHighNE(), node));
-                    node.children.Add(new TreeNode(node.oct.GetHighSW(), node));
-                    node.children.Add(new TreeNode(node.oct.GetHighSE(), node));
-                    node.children.Add(new TreeNode(node.oct.GetLowNW(), node));
-                    node.children.Add(new TreeNode(node.oct.GetLowNE(), node));
-                    node.children.Add(new TreeNode(node.oct.GetLowSW(), node));
-                    node.children.Add(new TreeNode(node.oct.GetLowSE(), node));
+                    node.InitializeChildren();
 
                     for (int i = 0; i < 8; i++)
                     {
-                        //if (node.children[i].q.contains(part))
-                        AddParticle(part, node.children[i]);
+                        if (node.children[i].oct.Contains(particle))
+                            AddParticle(particle, node.children[i]);
 
-                        //if (node.children[i].q.contains(node.body))
-                        AddParticle(node.body, node.children[i]);
+                        if (node.children[i].oct.Contains(node.body))
+                            AddParticle(node.body, node.children[i]);
                     }
                 }
             }
 
             node.body.position *= node.body.mass;
-            node.body.position += part.position * part.mass;
+            node.body.position += particle.position * particle.mass;
 
-            node.body.mass += part.mass;
+            node.body.mass += particle.mass;
             node.body.position *= (1f / node.body.mass);
         }
 
+        // Calculate the forces on all particles in the simulation using brute force.
         public Vec3D[] ForcesBrute()
         {
-            Vec3D[] forces = new Vec3D[bodyList.Count()];
+            Vec3D[] forces = new Vec3D[this.bodyList.Count()];
 
             for (int i = 0; i < forces.Length; i++)
                 forces[i] = new Vec3D(0f, 0f, 0f);
 
-            for (int i = 0; i < bodyList.Count(); i++)
-                for (int j = 0; j < bodyList.Count(); j++)
+            for (int i = 0; i < this.bodyList.Count(); i++)
+                for (int j = 0; j < this.bodyList.Count(); j++)
                 {
                     if (i == j) { continue; }
 
-                    Vec3D force = forcePair(bodyList[i], bodyList[j]);
+                    Vec3D force = ForcePair(this.bodyList[i], this.bodyList[j]);
 
                     forces[i] += force;
                 }
@@ -362,67 +330,59 @@ namespace BarnesHut
             return forces;
         }
 
-        public Vec3D[] forcesBHTree()
+        // Calculate the forces on all particles in the simulation using the BH tree.
+        public Vec3D[] ForcesBHTree()
         {
-            Vec3D[] forces = new Vec3D[bodyList.Count()];
+            Vec3D[] forces = new Vec3D[this.bodyList.Count()];
 
-            for (int i = 0; i < bodyList.Count(); i++)
-            {
-                forces[i] = forceTreeNode(rootNode, bodyList[i]);
-            }
+            for (int i = 0; i < this.bodyList.Count(); i++)
+                forces[i] = ForceTreeNode(this.rootNode, this.bodyList[i]);
 
             return forces;
         }
 
-        public Vec3D forceTreeNode(TreeNode node, Particle part)
+        // Calculate the force between a treenode and a particle.
+        public Vec3D ForceTreeNode(TreeNode node, Particle part)
         {
             float theta = node.oct.edgeLength / (float)Math.Sqrt((node.body.position - part.position).MagnitudeSquard());
 
             if ((node.body.position - part.position).MagnitudeSquard() == 0)
                 return new Vec3D(0, 0, 0);
 
-            if (theta < 1f) { return forcePair(part, node.body); }
+            if (theta < 1f) { return ForcePair(part, node.body); }
 
             if (node.children.Count() == 0)
-                return forcePair(part, node.body);
+                return ForcePair(part, node.body);
 
             Vec3D force = new Vec3D(0, 0, 0);
 
             for (int i = 0; i < 8; i++)
-            {
-                force += forceTreeNode(node.children[i], part);
-            }
+                force += ForceTreeNode(node.children[i], part);
 
             return force;
         }
 
-
-        /// <summary>
-        /// Function to calculate the force between 2 particles.
-        /// </summary>
-        /// <param name="a">First Particle to calculate the force for.</param>
-        /// <param name="b">Second Particle to calculate the force for.</param>
-        /// <returns></returns>
-        public Vec3D forcePair(Particle a, Particle b)
+        // Calculate the force between 2 particles.
+        public static Vec3D ForcePair(Particle a, Particle b)
         {
-            Vec3D force = new Vec3D(0, 0, 0);
             Vec3D r = a.position - b.position;
 
             float eps = 1f;
 
             if (Math.Sqrt(r.MagnitudeSquard()) > 1f)
-                force = -1.0f * ((a.mass * b.mass) / (float)Math.Pow(r.MagnitudeSquard() + eps * eps, 2 / 2)) * (r * (float)(1.0f / Math.Pow(r.MagnitudeSquard(), 1.0 / 2.0)));
+                return -1.0f * ((a.mass * b.mass) / (float)Math.Pow(r.MagnitudeSquard() + eps * eps, 2 / 2)) * (r * (float)(1.0f / Math.Pow(r.MagnitudeSquard(), 1.0 / 2.0)));
 
-            return force;
+            return new Vec3D(0, 0, 0);
         }
 
+        // Writes all the frames in this simulation to an injected streamwriter.
         public void WriteToFile(StreamWriter writer)
         {
             List<double> xList = new List<double>();
             List<double> yList = new List<double>();
             List<double> zList = new List<double>();
 
-            foreach (Particle body in bodyList)
+            foreach (Particle body in this.bodyList)
             {
                 xList.Add(body.position.xCoord);
                 yList.Add(body.position.yCoord);
